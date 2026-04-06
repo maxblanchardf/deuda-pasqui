@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Abonos Pascale</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+      padding: 20px 12px 40px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #718096;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    /* ── Resumen ── */
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 680px;
+      margin: 0 auto 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .card .label {
+      font-size: 0.68rem;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 5px;
+    }
+
+    .card .monto {
+      font-size: 1.1rem;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    .card.deuda-original .monto { color: #e53e3e; }
+    .card.abonado        .monto { color: #38a169; }
+    .card.pendiente      .monto { color: #d69e2e; }
+
+    /* ── Barra progreso ── */
+    .progress-wrap {
+      max-width: 680px;
+      margin: 0 auto 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #718096;
+      margin-bottom: 8px;
+    }
+
+    .bar-bg {
+      background: #e2e8f0;
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38a169, #68d391);
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    /* ── Formulario ── */
+    .form-wrap {
+      max-width: 680px;
+      margin: 0 auto 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .form-wrap h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #2d3748;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78rem;
+      color: #4a5568;
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"] {
+      width: 100%;
+      /* 16px prevents iOS auto-zoom */
+      font-size: 16px;
+      padding: 11px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      outline: none;
+      transition: border .2s;
+      -webkit-appearance: none;
+      appearance: none;
+      color: #1a202c;
+      background: #fff;
+    }
+
+    input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.15); }
+
+    .btn-add {
+      margin-top: 12px;
+      width: 100%;
+      padding: 14px;
+      background: #667eea;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      /* good touch target */
+      min-height: 48px;
+    }
+
+    .btn-add:active { background: #5a67d8; }
+
+    /* ── Historial — desktop: tabla, mobile: tarjetas ── */
+    .table-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .table-wrap h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: #2d3748;
+    }
+
+    /* Vista tabla (desktop) */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.87rem;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid #e2e8f0;
+      color: #718096;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tbody tr { border-bottom: 1px solid #f0f4f8; }
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td { padding: 10px; vertical-align: middle; }
+
+    .td-monto { font-weight: 600; color: #38a169; }
+    .td-saldo { font-weight: 600; color: #d69e2e; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #e53e3e;
+      font-size: 1.1rem;
+      padding: 6px 8px;
+      border-radius: 6px;
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .btn-del:active { background: #fff5f5; }
+
+    .empty-msg {
+      text-align: center;
+      color: #a0aec0;
+      padding: 28px 0;
+      font-size: 0.9rem;
+    }
+
+    /* Vista tarjetas (mobile) — oculta por defecto */
+    .cards-list { display: none; }
+
+    .abono-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .abono-card:last-child { margin-bottom: 0; }
+
+    .abono-card .ac-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .abono-card .ac-detalle {
+      font-weight: 600;
+      font-size: 0.95rem;
+      flex: 1;
+      padding-right: 8px;
+    }
+
+    .abono-card .ac-num {
+      font-size: 0.72rem;
+      color: #a0aec0;
+      background: #f0f4f8;
+      border-radius: 999px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+
+    .abono-card .ac-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: #718096;
+      margin-bottom: 4px;
+    }
+
+    .abono-card .ac-row span:last-child { font-weight: 600; }
+
+    .abono-card .ac-row.green span:last-child { color: #38a169; }
+    .abono-card .ac-row.amber span:last-child { color: #d69e2e; }
+
+    .abono-card .ac-del {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #e53e3e;
+      font-size: 1rem;
+      padding: 6px;
+      border-radius: 6px;
+      min-width: 36px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      body { padding: 14px 10px 50px; }
+
+      h1 { font-size: 1.3rem; }
+
+      /* Resumen: 3 columnas compactas en móvil */
+      .resumen { gap: 8px; }
+      .card { padding: 12px 6px; }
+      .card .monto { font-size: 0.95rem; }
+      .card .label { font-size: 0.62rem; }
+
+      /* Formulario: columna única */
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+
+      /* Ocultar tabla, mostrar tarjetas */
+      table { display: none; }
+      .cards-list { display: block; }
+    }
+
+    @media (min-width: 481px) {
+      .cards-list { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Abonos de Pascale</h1>
+  <p class="subtitle">Control de deuda — Deuda original: <strong>U$ 3,400.00</strong></p>
+
+  <!-- Resumen -->
+  <div class="resumen">
+    <div class="card deuda-original">
+      <div class="label">Deuda original</div>
+      <div class="monto" id="r-original">U$ 3,400.00</div>
+    </div>
+    <div class="card abonado">
+      <div class="label">Total abonado</div>
+      <div class="monto" id="r-abonado">U$ 0.00</div>
+    </div>
+    <div class="card pendiente">
+      <div class="label">Saldo pendiente</div>
+      <div class="monto" id="r-pendiente">U$ 3,400.00</div>
+    </div>
+  </div>
+
+  <!-- Barra progreso -->
+  <div class="progress-wrap">
+    <div class="prog-label">
+      <span>Progreso de pago</span>
+      <span id="pct">0%</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill" id="bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="form-wrap">
+    <h2>Registrar abono</h2>
+    <div class="form-grid">
+      <div class="full">
+        <label for="inp-detalle">Detalle</label>
+        <input type="text" id="inp-detalle" placeholder="Descripción del abono..." autocomplete="off" />
+      </div>
+      <div>
+        <label for="inp-fecha">Fecha</label>
+        <input type="date" id="inp-fecha" />
+      </div>
+      <div>
+        <label for="inp-monto">Monto (U$)</label>
+        <input type="number" id="inp-monto" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal" />
+      </div>
+    </div>
+    <button class="btn-add" onclick="agregarAbono()">+ Agregar abono</button>
+  </div>
+
+  <!-- Historial -->
+  <div class="table-wrap">
+    <h2>Historial de abonos</h2>
+
+    <!-- Tabla (desktop) -->
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Detalle</th>
+          <th>Abono</th>
+          <th>Saldo restante</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="6" class="empty-msg">Aún no hay abonos registrados.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Tarjetas (mobile) -->
+    <div class="cards-list" id="cards-list">
+      <p class="empty-msg">Aún no hay abonos registrados.</p>
+    </div>
+  </div>
+
+  <script>
+    const DEUDA = 3400;
+    const KEY   = 'pascale_abonos';
+
+    function cargar() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+      catch { return []; }
+    }
+
+    function guardar(data) {
+      localStorage.setItem(KEY, JSON.stringify(data));
+    }
+
+    function fmt(n) {
+      return 'U$ ' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function fmtFecha(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderizar() {
+      const data  = cargar();
+      const tbody = document.getElementById('tabla-body');
+      const cards = document.getElementById('cards-list');
+      let totalPagado = 0;
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">Aún no hay abonos registrados.</td></tr>';
+        cards.innerHTML = '<p class="empty-msg">Aún no hay abonos registrados.</p>';
+      } else {
+        let filas = '';
+        let tarjetas = '';
+
+        data.forEach((a, i) => {
+          totalPagado += a.monto;
+          const saldo = Math.max(0, DEUDA - totalPagado);
+
+          // fila tabla
+          filas += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${fmtFecha(a.fecha)}</td>
+              <td>${escHtml(a.detalle)}</td>
+              <td class="td-monto">${fmt(a.monto)}</td>
+              <td class="td-saldo">${fmt(saldo)}</td>
+              <td><button class="btn-del" onclick="eliminar(${i})" title="Eliminar">✕</button></td>
+            </tr>`;
+
+          // tarjeta mobile
+          tarjetas += `
+            <div class="abono-card">
+              <div class="ac-header">
+                <div class="ac-detalle">${escHtml(a.detalle)}</div>
+                <div class="ac-num"># ${i + 1}</div>
+              </div>
+              <div class="ac-row"><span>Fecha</span><span>${fmtFecha(a.fecha)}</span></div>
+              <div class="ac-row green"><span>Abono</span><span>${fmt(a.monto)}</span></div>
+              <div class="ac-row amber"><span>Saldo restante</span><span>${fmt(saldo)}</span></div>
+              <button class="ac-del" onclick="eliminar(${i})" title="Eliminar">✕</button>
+            </div>`;
+        });
+
+        tbody.innerHTML = filas;
+        cards.innerHTML = tarjetas;
+      }
+
+      // Resumen
+      const pagado    = data.reduce((s, a) => s + a.monto, 0);
+      const pendiente = Math.max(0, DEUDA - pagado);
+      const pct       = Math.min(100, (pagado / DEUDA) * 100);
+
+      document.getElementById('r-abonado').textContent   = fmt(pagado);
+      document.getElementById('r-pendiente').textContent = fmt(pendiente);
+      document.getElementById('pct').textContent         = pct.toFixed(1) + '%';
+      document.getElementById('bar').style.width         = pct + '%';
+    }
+
+    function agregarAbono() {
+      const detalle = document.getElementById('inp-detalle').value.trim();
+      const fecha   = document.getElementById('inp-fecha').value;
+      const monto   = parseFloat(document.getElementById('inp-monto').value);
+
+      if (!detalle) { alert('Por favor ingresa un detalle.'); return; }
+      if (!fecha)   { alert('Por favor selecciona una fecha.'); return; }
+      if (!monto || monto <= 0) { alert('Por favor ingresa un monto válido.'); return; }
+
+      const data = cargar();
+      data.push({ detalle, fecha, monto });
+      guardar(data);
+
+      document.getElementById('inp-detalle').value = '';
+      document.getElementById('inp-monto').value   = '';
+      // mantener la fecha actual
+
+      renderizar();
+    }
+
+    function eliminar(idx) {
+      if (!confirm('¿Eliminar este abono?')) return;
+      const data = cargar();
+      data.splice(idx, 1);
+      guardar(data);
+      renderizar();
+    }
+
+    // Fecha de hoy por defecto
+    document.getElementById('inp-fecha').value = new Date().toISOString().slice(0, 10);
+
+    renderizar();
+  </script>
+</body>
+</html>
