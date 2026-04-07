@@ -388,7 +388,7 @@
     <div class="form-grid">
       <div class="full">
         <label for="inp-detalle">Detalle</label>
-        <input type="text" id="inp-detalle" placeholder="Descripci√≥n del abono..." autocomplete="off" />
+        <input type="text" id="inp-detalle" placeholder="Descripci&#243;n del abono..." autocomplete="off" />
       </div>
       <div>
         <label for="inp-fecha">Fecha</label>
@@ -489,7 +489,7 @@
               <td>${escHtml(a.detalle)}</td>
               <td class="td-monto">${fmt(a.monto)}</td>
               <td class="td-saldo">${fmt(saldo)}</td>
-              <td><button class="btn-del" onclick="eliminar('${idStr}')" title="Eliminar">‚úï</button></td>
+              <td><button class="btn-del" onclick="eliminar('${idStr}')" title="Eliminar">x</button></td>
             </tr>`;
 
           tarjetas += `
@@ -501,7 +501,7 @@
               <div class="ac-row"><span>Fecha</span><span>${fmtFecha(a.fecha)}</span></div>
               <div class="ac-row green"><span>Abono</span><span>${fmt(a.monto)}</span></div>
               <div class="ac-row amber"><span>Saldo restante</span><span>${fmt(saldo)}</span></div>
-              <button class="ac-del" onclick="eliminar('${idStr}')" title="Eliminar">‚úï</button>
+              <button class="ac-del" onclick="eliminar('${idStr}')" title="Eliminar">x</button>
             </div>`;
         });
 
